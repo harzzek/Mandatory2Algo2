@@ -5,6 +5,8 @@ def userinput():
     x = 0
     y = 0
 
+    array2d = create2dArray(x, y)
+
     for x in range(amount):
         nodeStr = input()
         list_of_nodes = nodeStr.split(' ')
@@ -17,7 +19,6 @@ def userinput():
             y = newnode.y
         nodearray.append(newnode)
 
-    array2d = create2dArray(x, y)
     placeNodes(nodearray, array2d)
     return nodearray, array2d, x, y
 
@@ -66,7 +67,7 @@ def reduceVector(vector):
     return [int(vector[0] / gcdNum), int(vector[1] / gcdNum)]
 
 
-def o2(array2d, node, xmax, ymax):
+def o2(node, xmax, ymax):
     if (node.x == xmax / 2 and node.y == ymax / 2):
         return 0
     elif node.x < xmax / 2:
@@ -85,39 +86,45 @@ def o2(array2d, node, xmax, ymax):
             return radius
 
 
-def badO2(nodeArray, chosenNode):
+def badO2(nodeArray, node):
     radius = 0
     nodeToReturn = None
-    for node in nodeArray:
-        if (node.x != chosenNode.x or node.y != chosenNode.y):
-            tempRadius = distanceToNode(node, chosenNode)
+    for edge in nodeArray:
+        if (edge.x != node.x or edge.y != node.y):
+            tempRadius = distanceToNode(edge, node)
             if radius == 0:
-                nodeToReturn = node
+                nodeToReturn = edge
                 radius = tempRadius
             elif tempRadius > radius:
-                nodeToReturn = node
+                nodeToReturn = edge
                 radius = tempRadius
     return nodeToReturn
 
 
-def o3(array2d, node, toNode):
+def o3(array2d, node):
     x = node.x
     y = node.y
+    nodecross= 0
     nodelist = []
-    vector = createVector(node, toNode)
-    vector = reduceVector(vector)
-    while (x != toNode.x or y != toNode.y):
-        if (len(nodelist) == 2):
-            return True
-        x += vector[0]
-        y += vector[1]
-        if (array2d[x][y] != 0):
-            nodelist.append(array2d[x][y])
-    return False
+    for toNode in node.edges:
+
+        vector = createVector(node, toNode)
+        vector = reduceVector(vector)
+        while (x != toNode.x or y != toNode.y):
+            if (nodecross == 2):
+                nodelist.append(toNode)
+                nodecross = 0
+                break
+            x += vector[0]
+            y += vector[1]
+            if (array2d[x][y] != 0):
+                nodecross += 1
+    return nodelist
 
 
 def o4(nodeArray, node):
     node.edges.append(nodeArray[len(nodeArray) - 1])
+
 
 def placeNodes(nodearray, array2d):
     for node in nodearray:
@@ -149,8 +156,34 @@ class Node:
         self.edges = nodearray
 
 
+def validateEdges(nodeArray, node):
+    validEdges = []
+    if node.o1 > 0:
+        validEdges.append(o1(array2d, node))
+    if node.o2 > 0:
+
+
+    for edge in node.edges:
+        numse = 0
+    return 0
+
+#Ford-Fulkerson
+def augmentingPath(nodeArray, source, sink, parent):
+    visited = [False] * len(nodeArray)
+    queue = []
+    queue.append(source)
+    visited[source] = True
+    while queue:
+        u = queue.pop(0)
+        for ind, val in enumerate(nodeArray[u].edges):
+            if visited[ind] == False and val > 0:
+                queue.append(ind)
+                visited[ind] = True
+                parent[ind] = u
+    return True if visited[sink] else False
+
+
 nodearray, array2d, xmax, ymax = userinput()
 xmax = xmax + 1
 ymax = ymax + 1
-vector = createVector(nodearray[0], nodearray[4])
-print(reduceVector(vector))
+print(o3(array2d, nodearray[0], nodearray[5]))
